@@ -1,4 +1,4 @@
-""" retrait de la class
+""" v2 + retrait de la class
 
 Nombre d'actions en entrée: 20
 Temps d'exécution: 20.3425s

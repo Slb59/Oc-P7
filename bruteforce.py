@@ -34,6 +34,7 @@ class Action:
     price: float
     profit: float
 
+    @property
     def benefice(self) -> float:
         return self.price * self.profit / 100
 
@@ -50,7 +51,7 @@ def load_dataset() -> list:
 
 def print_actions(dataset: list) -> None:
     for action in dataset:
-        print(f"{action.name} prix: {action.price} € benefice: {action.benefice()} €")
+        print(f"{action.name} prix: {action.price} € benefice: {action.benefice} €")
 
 
 def totalcost(dataset: list) -> float:
@@ -58,7 +59,7 @@ def totalcost(dataset: list) -> float:
 
 
 def totalbenef(dataset: list) -> float:
-    return sum(action.benefice() for action in dataset)
+    return sum(action.benefice for action in dataset)
 
 
 def print_totalcost(dataset: list) -> None:
@@ -68,7 +69,7 @@ def print_totalcost(dataset: list) -> None:
 def print_totalbenef(dataset: list) -> None:
     print(f"benefice total: {totalbenef(dataset):.2f} €")
 
- 
+
 def bruteforce(dataset: list) -> list:
     result = []
     maxbenef = 0
@@ -81,7 +82,6 @@ def bruteforce(dataset: list) -> list:
     # 1111 si toutes les actions sont sélectionnées
     nb_combinaisons = 2**n
     for i in range(1, nb_combinaisons):
-
         # ecrit le rang sous forme binaire
         ch = bin(i)[2:]
         ch = (n - len(ch)) * "0" + ch
@@ -110,9 +110,9 @@ def bruteforce(dataset: list) -> list:
 if __name__ == "__main__":
     all_stocks = load_dataset()
     print(f"Nombre d'actions en entrée: {len(all_stocks)}")
-    t1=time()
+    t1 = time()
     best_stocks = bruteforce(all_stocks)
-    t2=time()
+    t2 = time()
     print(f"Temps d'exécution: {(t2-t1):.4f}s")
     print(f"Nombre d'actions en sortie: {len(best_stocks)}")
     print("-----------------")

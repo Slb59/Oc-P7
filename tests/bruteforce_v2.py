@@ -1,4 +1,4 @@
-""" retrait des logs et wrapper 
+""" V1 + retrait des logs et wrapper 
 Nombre d'actions en entrée: 20
 Temps d'exécution: 19.3582s = 0:00:19.358154
 Nombre d'actions en sortie: 10
