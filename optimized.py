@@ -1,37 +1,15 @@
 """
-Nombre d'actions en entrée: 20
-Temps d'exécution: 0.0000s
-Nombre d'actions en sortie: 12
------------------
-Actions retenues:
-Action-10 prix: 34.0 € benefice: 9.18 €
-Action-6 prix: 80.0 € benefice: 20.0 €
-Action-13 prix: 38.0 € benefice: 8.74 €
-Action-19 prix: 24.0 € benefice: 5.04 €
-Action-4 prix: 70.0 € benefice: 14.0 €
-Action-20 prix: 114.0 € benefice: 20.52 €
-Action-5 prix: 60.0 € benefice: 10.2 €
-Action-11 prix: 42.0 € benefice: 7.14 €
-Action-18 prix: 10.0 € benefice: 1.4 €
-Action-17 prix: 4.0 € benefice: 0.48 €
-Action-16 prix: 8.0 € benefice: 0.64 €
-Action-14 prix: 14.0 € benefice: 0.14 €
-Résultats:
-Coût total: 498.0 €
-benefice total: 97.48 €
+Optimize_v1 + class wallet
 """
 
 import csv
 from dataclasses import dataclass
 from time import time
 
-
-MAX_INVEST = 500
-csv_file = "./data/dataset0.csv"
-
-
 @dataclass
-class Action:
+class Stock:
+    """ a stock has a name, a price, a profit and a benefit=price*profit/100 """
+    
     name: str
     price: float
     profit: float
@@ -39,59 +17,72 @@ class Action:
     @property
     def benefit(self) -> float:
         return self.price * self.profit / 100
+
+class Wallet:
+    """ a wallet is a list of Stock
+    all wallets have a max_invest """
+
+    max_invest = 500
+
+    def __init__(self, csv_file = None) -> None:
+        """ a wallet can be init with a csv file
+        the csv file need the columns name, price and profit """
+        self.stocks = []
+        self.csv_file = csv_file
+
+        if self.csv_file is not None:
+            self.load_dataset()
+
+    def __repr__(self) -> str:
+        result = ''
+        result += (f'Actions du portefeuille: {len(self.stocks)}' + '\n')
+        for stock in self.stocks:
+            result +=(f"{stock.name} prix: {stock.price} € benefice: {stock.benefit} €" + '\n')
+        result +=("Valeur du portefeuille:" + '\n')
+        result +=(f'Coût total: {self.totalcost:.2f} €' + '\n')
+        result +=(f'Benefice sur 2 ans: {self.totalbenef:.2f} €' + '\n')
+        return result
+
+    def __len__(self):
+        return len(self.stocks)
+
+    @property
+    def totalcost(self) -> float:
+        """ the totalcost is the sum of the price of the stocks in the wallet """
+        return sum(stock.price for stock in self.stocks)
     
-def load_dataset() -> list:
-    result = []
-    with open(csv_file) as f:
-        reader = csv.DictReader(f, delimiter=",")
-        for row in reader:
-            action = Action(row["name"], float(row["price"]), float(row["profit"]))
-            result.append(action)
-    return result
+    @property
+    def totalbenef(self) -> float:
+        """ the totalbenef is the sum of the benef of the stocks in the wallet """
+        return sum(stock.benefit for stock in self.stocks)
+    
+    def load_dataset(self):
+        self.stocks = []
+        with open(self.csv_file) as f:
+            reader = csv.DictReader(f, delimiter=",")
+            for row in reader:
+                action = Stock(row["name"], float(row["price"]), float(row["profit"]))
+                self.stocks.append(action)
+        return self.stocks
 
-def print_stocks(dataset: list) -> None:
-    for action in dataset:
-        print(f"{action.name} prix: {action.price} € benefice: {action.benefit} €")
-
-
-def totalcost(dataset: list) -> float:
-    return sum(action.price for action in dataset)
-
-
-def totalbenef(dataset: list) -> float:
-    return sum(action.benefit for action in dataset)
-
-
-def print_totalcost(dataset: list) -> None:
-    print(f"Coût total: {totalcost(dataset)} €")
-
-def print_totalbenef(dataset: list) -> None:
-    print(f"benefice total: {totalbenef(dataset):.2f} €")
-
-def optimized(dataset: list) -> list:
-    result = []
+def optimized(wallet: Wallet) -> Wallet:    
+    best_wallet = Wallet()
     stock_list_cost = 0
     # sort dataset by reverse profit
-    sorted_dataset = sorted(dataset, key=lambda stock: stock.profit, reverse=True)
+    sorted_dataset = sorted(wallet.stocks, key=lambda stock: stock.profit, reverse=True)
     for stock in sorted_dataset:
-        if stock.price + stock_list_cost <= MAX_INVEST:
+        if stock.price + stock_list_cost <= wallet.max_invest:
             stock_list_cost += stock.price
-            result.append(stock)
-        if stock_list_cost == MAX_INVEST:
+            best_wallet.stocks.append(stock)
+        if stock_list_cost == wallet.max_invest:
             break
-    return result
+    return best_wallet
 
 if __name__ == "__main__":
-    all_stocks = load_dataset()
+    all_stocks = Wallet(csv_file = "./data/dataset0.csv")
     print(f"Nombre d'actions en entrée: {len(all_stocks)}")
-    t1 = time()
-    best_stocks = optimized(all_stocks)
-    t2 = time()
-    print(f"Temps d'exécution: {(t2-t1):.4f}s")
-    print(f"Nombre d'actions en sortie: {len(best_stocks)}")
-    print("-----------------")
-    print("Actions retenues:")
-    print_stocks(best_stocks)
-    print("Résultats:")
-    print_totalcost(best_stocks)
-    print_totalbenef(best_stocks)
+    t1=time()
+    best_wallet = optimized(all_stocks)
+    t2=time()
+    print(f"Function executed in {(t2-t1):.4f}s")
+    print(best_wallet)
