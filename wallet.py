@@ -1,10 +1,5 @@
-"""
-Optimize_v1 + class wallet
-"""
-
 import csv
 from dataclasses import dataclass
-from time import time
 
 @dataclass
 class Stock:
@@ -43,7 +38,7 @@ class Wallet:
         result = ''
         result += (f'Actions du portefeuille: {len(self.stocks)}' + '\n')
         for stock in self.stocks:
-            result +=(f"{stock.name} prix: {stock.price} € benefice: {stock.benefit} €" + '\n')
+            result +=(f"{stock.name} prix: {stock.price} € benefice: {stock.benefit:.2f} €" + '\n')
         result +=("Valeur du portefeuille:" + '\n')
         result +=(f'Coût total: {self.totalcost:.2f} €' + '\n')
         result +=(f'Benefice sur 2 ans: {self.totalbenef:.2f} €' + '\n')
@@ -72,50 +67,6 @@ class Wallet:
                         action.profit > 0 and
                         round(action.benefit,2) > 0 ):
                     self.stocks.append(action)
+        # remove duplicate stock
+        self.stocks = list(set(self.stocks)) 
         return self.stocks
-
-def optimized(wallet: Wallet) -> Wallet:    
-    best_wallet = Wallet()
-    n = len(wallet)
-    max_invest = int(wallet.max_invest*100)
-
-    sol = [[0 for _ in range(max_invest+1)] for _ in range(n+1)]
-    
-    # first line : 0 stock is tested
-    # last line : the nieme stock is tested
-    for i_stock in range(n+1): 
-        price_stock = int(wallet.stocks[i_stock-1].price*100) # line i_stock is the stock i_stock-1
-        for cost in range(price_stock, max_invest+1):
-            if i_stock ==0 or cost ==0:
-                sol[i_stock][cost] = 0
-            elif price_stock <= cost:
-                sol[i_stock][cost] = max(
-                    int(wallet.stocks[i_stock-1].benefit*100) + sol[i_stock-1][cost-price_stock],
-                    sol[i_stock-1][cost]
-                )
-            else:
-                sol[i_stock][cost] = sol[i_stock-1][cost]
-    p = max_invest
-    res = sol[n][p]
-  
-    for i in range(n,0,-1):
-        if res == sol[i-1][p]:
-            continue
-        else:
-            p = p - int(wallet.stocks[i-1].price)*100
-            best_wallet.stocks.append(wallet.stocks[i-1])
-            res = res - wallet.stocks[i-1].benefit*100
-            if res < 0:
-                break          
-
-    return best_wallet
-
-if __name__ == "__main__":
-    all_stocks = Wallet(csv_file = "./data/dataset2.csv")
-    all_stocks.stocks = list(set(all_stocks.stocks))
-    print(f"Nombre d'actions en entrée: {len(all_stocks)}")
-    t1=time()
-    best_wallet = optimized(all_stocks)
-    t2=time()
-    print(f"Function executed in {(t2-t1):.4f}s")
-    print(best_wallet)
