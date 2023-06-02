@@ -6,12 +6,12 @@ the bruteforce method is implemented
 
 complexity : 2**n (n: number of stocks)
 """
+
 import time
-# from time import time
 from wallet import Wallet
-    
+
+
 def bruteforce(wallet: Wallet) -> Wallet:
-    
     best_wallet = Wallet()
     maxbenef = 0
     n = len(wallet)
@@ -22,6 +22,7 @@ def bruteforce(wallet: Wallet) -> Wallet:
     # dit que l'on sélectionne l'action 1 et l'action 3
     # 1111 si toutes les actions sont sélectionnées
     nb_combinaisons = 2**n
+
     for i in range(1, nb_combinaisons):
         # ecrit le rang sous forme binaire
         ch = bin(i)[2:]
@@ -38,10 +39,10 @@ def bruteforce(wallet: Wallet) -> Wallet:
                     current_wallet.stocks.append(wallet.stocks[j])
                     wallet_total_cost += wallet.stocks[j].price
                 else:
-                    current_wallet.stocks=[]
+                    current_wallet.stocks = []
                     wallet_total_cost = 0
                     break  # la combinaison est trop cher
-       
+
         if maxbenef < current_wallet.totalbenef:
             maxbenef = current_wallet.totalbenef
             best_wallet = current_wallet
@@ -50,10 +51,10 @@ def bruteforce(wallet: Wallet) -> Wallet:
 
 
 if __name__ == "__main__":
-    all_stocks = Wallet(csv_file = "./data/dataset0.csv") 
+    all_stocks = Wallet(csv_file="./data/dataset0.csv")
     print(f"Nombre d'actions en entrée: {len(all_stocks)}")
-    t1=time.process_time()
+    t1 = time.process_time()
     best_wallet = bruteforce(all_stocks)
-    t2=time.process_time()
+    t2 = time.process_time()
     print(f"Function executed in {(t2-t1):.4f}s")
     print(best_wallet)
